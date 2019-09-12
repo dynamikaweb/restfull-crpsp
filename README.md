@@ -1,41 +1,46 @@
 # `CRP-SP API` Dynamika
 
+<br>
+
  * master link: https://crpsp.org/api
  * develop link: http://crp-sp.rodrigo.dynamika.com.br:8080/api
 
-<br><br>
-
 ## Exemplos de utilização
 
-Parametros:
-
+**Parametros de Entrada:**
  * `modulo` (obrigatório em view) modulo onde sera feito a consulta
  * `limit` (padrão: 1) limite de registros
  * `id` alias mais simples de  ***Modulo*Search[id]**
 
+**Parametros de Saida:**
+ * `name` Tipo da Saida
+ * `message` Relatório da consulta
+ * `code` se está disponivel `data`
+ * `status` codigo de estado da requisição (http code)
+ * `type` class
+ * `data` dados para consumo
+ * `count` contagem de registros
+
 #### Disponibilidade
-sempre retornara `"data":true` se a api estiver funcionado. 
+sempre retorna `"data":true` enquanto à api estiver em funcionado. 
 
-request | `name` | `message` | `code` | `status` | `type` | `data`
-:---------- | ---- | ------- | ---- | ------ | ---- | ----
-/api | Status | API está funcionando! | 1 | 200 | yii\\web\\Application | true
-
+request | `name` | `code` | `status` 
+:------ | ------ | ------ | -------
+/api | Status | 1 | 200 
 ```JSON
 {"name":"Status","message":"API está funcionando!","code":1,"status":200,"type":"yii\\web\\Application","data":true}
 ```
 
 
 #### Visualização
-retorna os registros, o parametro `modulo` é obrigatório estiver faltando ou não foir previamente autorizado vai emitir um erro.
+retorna os registros, o parametro `modulo` é obrigatório se estiver faltando ou não for autorizado vai ocorrer um erro.
 
-
-request | `name` | `message` | `code` | `status` | `type` | `data`
-:---------- | ---- | ------- | ---- | ------ | ---- | ----
-/api/view | Bad Request | Parâmetros obrigatórios ausentes: modulo | 0 | 400 | yii\\web\\BadRequestHttpException | <br>
-/api/view?modulo=usuario | Forbiden | Não autorizado! | 0 | 403 | yii\\web\\HttpException | <br>
-/api/view?modulo=noticia | view |Concluído com sucesso! | 1 | 200 | yii\\web\\Application | array
-/api/view?modulo=noticia&limit=5 | view |Concluído com sucesso! | 1 | 200 | yii\\web\\Application | array
-
+request | `name` | `code` | `status` 
+:------ | ------ | ------ | -------
+/api/view | Bad Request | 0 | 400 
+/api/view?modulo=usuario | Forbiden | 0 | 403 
+/api/view?modulo=noticia | view | 1 | 200 
+/api/view?modulo=noticia&limit=5 | view | 1 | 200 
 
 
 ```JSON
