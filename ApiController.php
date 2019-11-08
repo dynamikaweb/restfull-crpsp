@@ -15,7 +15,8 @@ use yii\web\HttpException;
  * 
  * *
  * 
- * @version 1.0 (12/09/2019)
+ * @version 1.0 (12/09/2019) => primeira versão funcional
+ * @version 2.0 (08/11/2019) => suporte de arquivos
  * @author Rodrigo Dornelles <rodrigo@dornelles.me> <rodrigo@dynamika.com.br>
  * 
  * *
@@ -26,13 +27,12 @@ use yii\web\HttpException;
  * 
  * *
  * 
- * @example
- *      
-    "name":"Status"
-    "message":"API está funcionando!"
-    "code":1
-    "status":200
-    "type": "yii\\web\\Application"    
+ * @example     
+ *   "name":"Status"
+ *   "message":"API está funcionando!"
+ *   "code":1
+ *   "status":200
+ *   "type": "yii\\web\\Application"    
  */
 
 class ApiController extends SiteBaseController
@@ -108,18 +108,8 @@ class ApiController extends SiteBaseController
      */
     public function actionView($modulo)
     {
-        // Classe {modulo}Search 
-        $modulo = '\common\models\search\\'.ucfirst($modulo).'Search';        
-        
-        // Filters SearchModel
-        $searchModel = new $modulo;
-        $searchModel->pageSize = Yii::$app->request->get('limit', 1);
-        $searchModel->id = Yii::$app->request->get('id', null);
-        
         // ActiveDataProvider Search
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        // Resultado
+        $dataProvider = $this->findModels($modulo);
         $models = $dataProvider->getModels();
         $count = $dataProvider->getCount();
 
@@ -132,6 +122,86 @@ class ApiController extends SiteBaseController
         return $this->json($models, ['count' => $count]);
     }
 
+    /**
+     * actionFile
+     * 
+     * retorna array de links para arquivos
+     *
+     * @param  string $modulo => modulo a ser consultado
+     * @param  integer $id => identificador do documento
+     * @param  string $size => tamanho das imagens
+     * 
+     * @return void
+     */
+    public function actionFiles($modulo, $id, $size = 'thumb_')
+    {
+        $dataProvider = $this->findModels($modulo);
+        $models = $dataProvider->getModels();
+        $count = $dataProvider->getCount();
+
+        // Verifica foi encontrado registros
+        if($count == 0){
+            throw new HttpException(404,'Nenhum registro foi encontrado!');
+        }
+
+        $model = array_shift($models);
+        $arquivos = array();
+
+        // Arquivo unico
+        if($model->canGetProperty('arquivo')){
+            $arquivo = $model->arquivo;
+            $prefix = $arquivo->tipo == $arquivo::TIPO_IMAGEM ? $size:''; //Prefixo tamanho da imagem
+            $arquivos []= $arquivo->getFileUrl($modulo, $prefix);
+        }
+
+        // Arquivos Multiplos
+        if($model->canGetProperty('arquivos'))
+        {
+            foreach($model->arquivos as $arquivo){
+                $prefix = $arquivo->tipo == $arquivo::TIPO_IMAGEM ? $size:''; //Prefixo tamanho da imagem
+                $arquivos []= $arquivo->getFileUrl($modulo, $prefix);
+            }
+        }
+
+        // Contar arquivos
+        $count = count($arquivos);
+
+
+        // Verifica foi encontrado registros
+        if($count == 0){
+            throw new HttpException(404,'Nenhum arquivo foi encontrado!');
+        }
+
+        
+        return $this->json($arquivos, ['count' => $count]);
+    }
+
+
+
+    /**
+     * findModels
+     * 
+     * encontra os registros de acordo com o modulo
+     *
+     * @param  string $modulo Modulo
+     *
+     * @return object data provider
+     */
+    private function findModels($modulo)
+    {
+        // Classe {modulo}Search 
+        $modulo = '\common\models\search\\'.ucfirst($modulo).'Search';        
+        
+        // Filters SearchModel
+        $searchModel = new $modulo;
+        $searchModel->pageSize = Yii::$app->request->get('limit', 1);
+        $searchModel->id = Yii::$app->request->get('id', null);
+        
+        // ActiveDataProvider Search
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $dataProvider;
+    }
 
     /**
      * json
@@ -147,7 +217,7 @@ class ApiController extends SiteBaseController
     {
         // parametros de resposta
         $default = [
-            'name' => Yii::$app->controller->action->id,
+            'name' => ucfirst(Yii::$app->controller->action->id),
             'message' => 'Concluído com sucesso!',
             'code' => 1,
             'status' => 200,
