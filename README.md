@@ -63,8 +63,20 @@ request | ordem |
 /api/view?modulo=noticia&limit=10&sort=-data_publicacao | Data Decrescente `DESC data_publicacao` | 
 
 
+#### Filtrar 
+para estabelecer filtros dos registros basta adicionar o parametro ***Modulo*Search[*atributo*]**, onde **Modulo** é o nome do modulo iniciando de letra maiscula, e **atributo** é o campo a ser buscado
+
+request | ordem |
+:------ | :---- | 
+/api/view?modulo=noticia?NoticiaSearch[titulo]=Sexta+Feira | noticias que contem `sexta feira` no titulo |
+/api/view?modulo=noticia?NoticiaSearch[old_importado]=1 | apenas noticias antigas importadas |
+/api/view?modulo=noticia?NoticiaSearch[id]=555 | existe um alias de apenas `id`
+/api/view?modulo=noticia?NoticiaSearch[destaque]=1&NoticiaSearch[fonte_link]=crpsp | dois ou mais filtros
+
+
+
 #### Arquivos
-Similar a visualização porem o parametro ID é obrigatório, e tem o retorno de um array de links no parametro `data`
+Similar a visualização porem o parametro ID é obrigatório
 
 **Parametros de Entrada:**
  * `size` (obrigatório, padrão é `thumb_`) tamanho das imagens (`original_`, `maior_` `media_`, `thumb_`)
@@ -76,5 +88,5 @@ request | `name` | `code` | `status`
 /api/files?modulo=noticia&id=555&size=original_ | Files | 1 | 200 
 
 ```JSON
-{"name":"Files","message":"Concluído com sucesso!","code":1,"status":200,"type":"yii\\web\\Application","data":["/uploads/noticia/3230/thumb_X_psrRaUva2uDgjIuMAECgQp_fcf-GHj.JPG"],"count":1}
+{"name":"Files","message":"Concluído com sucesso!","code":1,"status":200,"type":"yii\\web\\Application","data":[{"id":3230,"arquivo":"X_psrRaUva2uDgjIuMAECgQp_fcf-GHj.JPG","tipo_mime":"image/jpeg","tamanho":"190512","nome_original":"08.JPG","legenda":null,"posicao":1,"data_publicacao":"25/10/2019","tipo":"I","ativo":true,"data_criacao":"25/10/2019 18:06:45","data_modificacao":"25/10/2019 18:06:45","id_arquivo_categoria":null,"prefix":"thumb_","url":"/uploads/noticia/3230/thumb_X_psrRaUva2uDgjIuMAECgQp_fcf-GHj.JPG"}],"count":1}
 ```
